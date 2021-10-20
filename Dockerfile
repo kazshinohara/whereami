@@ -7,13 +7,13 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -v -o backend .
+RUN go build -v -o whereami .
 
 FROM debian:buster-slim
 RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app/backend /backend
+COPY --from=builder /app/whereami /whereami
 
-CMD ["/backend"]
+CMD ["/whereami"]
