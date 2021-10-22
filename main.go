@@ -45,6 +45,10 @@ type hostnameResponse struct {
 	Hostname string `json:"hostname"`
 }
 
+type sourceIpResponse struct {
+	SourceIp string `json:"source_ip"`
+}
+
 func resolveRegion() string {
 	if !metadata.OnGCE() {
 		log.Println("This app is not running on GCE")
@@ -81,6 +85,17 @@ func resolveHostname() string {
 		return "unknown"
 	}
 	return hostname
+}
+
+func resolveSourceIp(r *http.Request) string {
+	_, xff := r.Header["X-Forwarded-For"]
+	if xff {
+		return r.Header["X-Forwarded-For"][0]
+	} else if len(r.RemoteAddr) > 0 {
+		return r.RemoteAddr
+	} else {
+		return "unknown"
+	}
 }
 
 func fetchRootResponse(w http.ResponseWriter, r *http.Request) {
@@ -171,6 +186,21 @@ func fetchHostnameResponse(w http.ResponseWriter, r *http.Request) {
 	w.Write(responseBody)
 }
 
+func fetchSourceIpResponse(w http.ResponseWriter, r *http.Request) {
+	responseBody, err := json.Marshal(&sourceIpResponse{
+		SourceIp: resolveSourceIp(r),
+	})
+	if err != nil {
+		log.Printf("could not json.Marshal: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	w.Write(responseBody)
+}
+
+// Not json yet
 func fetchHeadersResponse(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	headerKey := vars["key"]
@@ -190,6 +220,7 @@ func main() {
 	router.HandleFunc("/region", fetchRegionResponse).Methods("GET")
 	router.HandleFunc("/cluster", fetchClusterResponse).Methods("GET")
 	router.HandleFunc("/hostname", fetchHostnameResponse).Methods("GET")
+	router.HandleFunc("/sourceip", fetchSourceIpResponse).Methods("GET")
 	router.HandleFunc("/headers/{key}", fetchHeadersResponse).Methods("GET")
 	err := http.ListenAndServe(":"+port, router)
 	if err != nil {

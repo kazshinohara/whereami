@@ -5,34 +5,94 @@ Corresponding to GET request, this app returns the following information as JSON
 
 GET /kind
 - Kind (You can specify as an env var)
+```shell
+❯ curl -s http://example.com/kind | jq
+{
+  "kind": "test"
+}
+```
 
 GET /version
 - Version (You can specify as an env var)
-  
+```shell
+❯ curl -s http://example.com/version | jq
+{
+  "version": "v1"
+}
+```
+
 GET /region
 - GCP Region
-  
+```shell
+❯ curl -s http://example.com/region | jq
+{
+  "region": "asia-northeast1"
+}
+```  
+
 GET /cluster
 - GKE cluster name
-  
+```shell
+❯ curl -s http://example.com/cluster | jq
+{
+  "cluster": "asm-cluster-01"
+}
+```
 GET /hostname
 - Pod's Hostname
+```shell
+❯ curl -s http://example.com/hostname | jq
+{
+  "hostname": "whereami-687fbc6846-plrnj"
+}
+```
+
+GET /sourceip
+- Source IP Address of your request, if you set multiple X-Forwarded-For, this app returns the first one.
+```shell
+❯ curl -s http://example.com/sourceip | jq
+{
+  "source_ip": "[::1]:58846"
+}
+```
+```shell
+❯ curl -s -H "X-Forwarded-For: 1.1.1.1" http://example.com/sourceip | jq
+{
+  "source_ip": "1.1.1.1"
+}
+```
+
 
 GET /
 - all of above
+```shell
+❯ curl -s http://example.com/ | jq
+{
+  "kind": "test",
+  "version": "v1",
+  "region": "asia-northeast1",
+  "cluster": "asm-cluster-01",
+  "hostname": "whereami-687fbc6846-plrnj"
+}
+```
 
 GET /headers/{key}
 - A specific request header value.
-
 ```shell
-❯ curl -H 'Host:www.example.com'  http://localhost:8080/headers/Host                                                                                                                                                                                            (gke_kzs-sandbox_asia-northeast1_asm-cluster-01/fortio)
-www.example.com
+❯ curl http://example.com/headers/Host
+example.com
+```
+```shell
+❯ curl http://example.com/headers/User-Agent
+curl/7.64.1
 ```
 
 ## How to use
 
-This is a public container image.  
-You can use in any you like.
+This is a public container image, please take it if you like.  
+Image url is ***asia-northeast1-docker.pkg.dev/kzs-sandbox/public/whereami:1.0.1***  
+The version tag might change per future release.
+
 
 Here is an example of Service/Deployment manifest.
 ```yaml
@@ -51,7 +111,7 @@ spec:
         app: whereami
     spec:
       containers:
-        - image: asia-northeast1-docker.pkg.dev/kzs-sandbox/public/whereami:v2
+        - image: asia-northeast1-docker.pkg.dev/kzs-sandbox/public/whereami:1.0.1
           imagePullPolicy: Always
           name: whereami
           ports:

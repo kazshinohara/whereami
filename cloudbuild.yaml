@@ -1,0 +1,13 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: Build
+  args:
+    - 'build'
+    - '-t'
+    - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/public/whereami:${TAG_NAME}'
+    - '.'
+- name: 'gcr.io/cloud-builders/docker'
+  id: Push
+  args:
+    - 'push'
+    - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/public/whereami:${TAG_NAME}'
