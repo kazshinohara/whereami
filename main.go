@@ -90,7 +90,7 @@ func resolveHostname() string {
 func resolveSourceIp(r *http.Request) string {
 	_, xff := r.Header["X-Forwarded-For"]
 	if xff {
-		return r.Header["X-Forwarded-For"][0]
+		return strings.Split(r.Header["X-Forwarded-For"][0], ",")[0]
 	} else if len(r.RemoteAddr) > 0 {
 		return r.RemoteAddr
 	} else {
