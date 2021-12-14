@@ -52,7 +52,7 @@ GET /sourceip
 ```shell
 ❯ curl -s http://example.com/sourceip | jq
 {
-  "source_ip": "[::1]:58846"
+  "source_ip": "X.X.X.X"
 }
 ```
 ```shell
@@ -65,6 +65,7 @@ GET /sourceip
 
 GET /
 - all of above
+- you can get a single field wth a query param
 ```shell
 ❯ curl -s http://example.com/ | jq
 {
@@ -72,6 +73,12 @@ GET /
   "version": "v1",
   "region": "asia-northeast1",
   "cluster": "asm-cluster-01",
+  "hostname": "whereami-687fbc6846-plrnj"
+  "source_ip": "X.X.X.X"
+}
+
+❯ curl -s http://example.com/?param=hostname | jq
+{
   "hostname": "whereami-687fbc6846-plrnj"
 }
 ```
@@ -90,7 +97,7 @@ curl/7.64.1
 ## How to use
 
 This is a public container image, please take it if you like.  
-Image url is ***asia-northeast1-docker.pkg.dev/kzs-sandbox/public/whereami:1.0.1***  
+Image url is ***asia-northeast1-docker.pkg.dev/kzs-sandbox/public/whereami:1.0.2***  
 The version tag might change per future release.
 
 
@@ -111,7 +118,7 @@ spec:
         app: whereami
     spec:
       containers:
-        - image: asia-northeast1-docker.pkg.dev/kzs-sandbox/public/whereami:1.0.1
+        - image: asia-northeast1-docker.pkg.dev/kzs-sandbox/public/whereami:1.0.2
           imagePullPolicy: Always
           name: whereami
           ports:
