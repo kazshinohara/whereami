@@ -23,6 +23,7 @@ type rootResponse struct {
 	Region   string `json:"region"`
 	Cluster  string `json:"cluster"`
 	Hostname string `json:"hostname"`
+	SouceIP  string `json:"souce_ip"`
 }
 
 type kindResponse struct {
@@ -99,21 +100,37 @@ func resolveSourceIp(r *http.Request) string {
 }
 
 func fetchRootResponse(w http.ResponseWriter, r *http.Request) {
-	responseBody, err := json.Marshal(&rootResponse{
-		Kind:     kind,
-		Version:  version,
-		Region:   resolveRegion(),
-		Cluster:  resolveCluster(),
-		Hostname: resolveHostname(),
-	})
-	if err != nil {
-		log.Printf("could not json.Marshal: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	switch param := r.URL.Query().Get("param"); param {
+	case "kind":
+		fetchKindResponse(w, r)
+	case "version":
+		fetchVersionResponse(w, r)
+	case "region":
+		fetchRegionResponse(w, r)
+	case "cluster":
+		fetchClusterResponse(w, r)
+	case "hostname":
+		fetchHostnameResponse(w, r)
+	case "sourceip":
+		fetchSourceIpResponse(w, r)
+	default:
+		responseBody, err := json.Marshal(&rootResponse{
+			Kind:     kind,
+			Version:  version,
+			Region:   resolveRegion(),
+			Cluster:  resolveCluster(),
+			Hostname: resolveHostname(),
+			SouceIP: resolveSourceIp(r),
+		})
+		if err != nil {
+			log.Printf("could not json.Marshal: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 
-	w.Header().Set("Content-type", "application/json")
-	w.Write(responseBody)
+		w.Header().Set("Content-type", "application/json")
+		w.Write(responseBody)
+	}
 }
 
 func fetchKindResponse(w http.ResponseWriter, r *http.Request) {
